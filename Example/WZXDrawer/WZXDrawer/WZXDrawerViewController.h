@@ -71,8 +71,7 @@ typedef NS_ENUM(NSInteger,WZXDrawerType) {
  *
  *  @return WZXDrawerViewController对象
  */
-+ (WZXDrawerViewController *)wzx_drawerViewControllerWithLeftViewController:(UIViewController *)leftVC mainViewController:(UIViewController *)mainVC rightViewController:(UIViewController *)rightVC;
-
++ (instancetype)wzx_drawerViewControllerWithLeftViewController:(UIViewController *)leftVC mainViewController:(UIViewController *)mainVC rightViewController:(UIViewController *)rightVC;
 /**
  *  左抽屉
  *

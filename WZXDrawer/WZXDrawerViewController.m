@@ -118,7 +118,7 @@ typedef NS_ENUM(NSInteger, WZXDrawerShowState) {
             _leftVC.view.frame  = leftFrame;
             
             CGRect mainFrame    = _mainVC.view.frame;
-            mainFrame.origin.x += _leftViewWidth;
+            mainFrame.origin.x  = _leftViewWidth;
             _mainVC.view.frame  = mainFrame;
         }];
     }
@@ -128,11 +128,11 @@ typedef NS_ENUM(NSInteger, WZXDrawerShowState) {
     if (_drawerType == WZXDrawerTypePlane) {
         [UIView animateWithDuration:animated?_duration:0 animations:^{
             CGRect rightFrame    = _rightVC.view.frame;
-            rightFrame.origin.x -= _rightViewWidth;
+            rightFrame.origin.x  = self.view.frame.size.width - _rightViewWidth;
             _rightVC.view.frame  = rightFrame;
             
             CGRect mainFrame     = _mainVC.view.frame;
-            mainFrame.origin.x  -= _rightViewWidth;
+            mainFrame.origin.x   = -_rightViewWidth;
             _mainVC.view.frame   = mainFrame;
         }];
     }
@@ -142,7 +142,7 @@ typedef NS_ENUM(NSInteger, WZXDrawerShowState) {
     if (_drawerType == WZXDrawerTypePlane) {
         [UIView animateWithDuration:animated?_duration:0 animations:^{
             CGRect leftFrame    = _leftVC.view.frame;
-            leftFrame.origin.x -= _leftViewWidth;
+            leftFrame.origin.x  = -_leftViewWidth;
             _leftVC.view.frame  = leftFrame;
             
             CGRect mainFrame    = _mainVC.view.frame;

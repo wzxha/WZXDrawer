@@ -7,7 +7,7 @@
 - 自定义左右view长度
 
 ## 怎么使用
-- 基本的侧滑功能,先import "WZXDrawerViewController.h"
+- 基本的侧滑功能,先创建一个VC继承于WZXDrawerViewController
 
   ```objc
   /**

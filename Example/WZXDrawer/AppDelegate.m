@@ -23,7 +23,9 @@
     self.window.frame = [UIScreen mainScreen].bounds;
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
-    HomeViewController * homeVC = [HomeViewController wzx_drawerViewControllerWithLeftViewController:[LeftViewController new] mainViewController:[MainViewController new] rightViewController:[RightViewController new]];
+    HomeViewController * homeVC = [HomeViewController wzx_drawerViewControllerWithLeftViewController:[[UINavigationController alloc] initWithRootViewController:[LeftViewController new]]
+        mainViewController:[[UINavigationController alloc] initWithRootViewController:[MainViewController new]]
+        rightViewController:[[UINavigationController alloc] initWithRootViewController:[RightViewController new]]];
     homeVC.leftViewWidth = 300;
     homeVC.rightViewWidth = 200;
     self.window.rootViewController = homeVC;

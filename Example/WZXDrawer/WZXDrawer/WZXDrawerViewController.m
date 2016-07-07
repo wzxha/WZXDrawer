@@ -61,10 +61,12 @@ typedef NS_ENUM(NSInteger, WZXDrawerShowState) {
     
     if (self.leftVC)  {
         [self addLeftViewController];
+        [self leftViewControllerAddPan];
         [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(wzx_showLeft:) name:WZX_DRAWER_SHOW_LEFT object:nil];
     }
     if (self.rightVC) {
         [self addRightViewController];
+        [self rightViewControllerAddPan];
         [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(wzx_showRight:) name:WZX_DRAWER_SHOW_RIGHT object:nil];
     }
     
@@ -80,6 +82,8 @@ typedef NS_ENUM(NSInteger, WZXDrawerShowState) {
     _mainVC.view.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
     [self.view addSubview:_mainVC.view];
     [_mainVC didMoveToParentViewController:self];
+    
+    [self mainViewControllerAddPan];
 }
 
 - (void)addLeftViewController {
@@ -112,7 +116,8 @@ typedef NS_ENUM(NSInteger, WZXDrawerShowState) {
 
 - (void)_showLeftViewController:(BOOL)animated {
     if (_drawerType == WZXDrawerTypePlane) {
-        [UIView animateWithDuration:animated?_duration:0 animations:^{
+        CGFloat realDuration = _duration * ABS(_leftVC.view.frame.origin.x / -_leftViewWidth);
+        [UIView animateWithDuration:animated?realDuration:0 animations:^{
             CGRect leftFrame    = _leftVC.view.frame;
             leftFrame.origin.x  = 0;
             _leftVC.view.frame  = leftFrame;
@@ -120,13 +125,19 @@ typedef NS_ENUM(NSInteger, WZXDrawerShowState) {
             CGRect mainFrame    = _mainVC.view.frame;
             mainFrame.origin.x  = _leftViewWidth;
             _mainVC.view.frame  = mainFrame;
+            
+            CGRect rightFrame   = _rightVC.view.frame;
+            mainFrame.origin.x  = self.view.frame.size.width + _leftViewWidth;
+            _rightVC.view.frame = rightFrame;
         }];
     }
+    _showState = WZXDrawerShowStateLeft;
 }
 
 - (void)_showRightViewController:(BOOL)animated {
     if (_drawerType == WZXDrawerTypePlane) {
-        [UIView animateWithDuration:animated?_duration:0 animations:^{
+        CGFloat realDuration = _duration * ABS((_rightViewWidth - self.view.frame.size.width + _rightVC.view.frame.origin.x) / _rightViewWidth);
+        [UIView animateWithDuration:animated?realDuration:0 animations:^{
             CGRect rightFrame    = _rightVC.view.frame;
             rightFrame.origin.x  = self.view.frame.size.width - _rightViewWidth;
             _rightVC.view.frame  = rightFrame;
@@ -134,13 +145,19 @@ typedef NS_ENUM(NSInteger, WZXDrawerShowState) {
             CGRect mainFrame     = _mainVC.view.frame;
             mainFrame.origin.x   = -_rightViewWidth;
             _mainVC.view.frame   = mainFrame;
+            
+            CGRect leftFrame    = _leftVC.view.frame;
+            leftFrame.origin.x  = -_leftViewWidth - _rightViewWidth;
+            _leftVC.view.frame  = leftFrame;
         }];
     }
+    _showState = WZXDrawerShowStateRight;
 }
 
-- (void)_hideLeftViewController:(BOOL)animated {
+- (void)_hideViewController:(BOOL)animated {
     if (_drawerType == WZXDrawerTypePlane) {
-        [UIView animateWithDuration:animated?_duration:0 animations:^{
+        CGFloat realDuration = _duration * ABS((_leftViewWidth + _leftVC.view.frame.origin.x) / _leftViewWidth);
+        [UIView animateWithDuration:animated?realDuration:0 animations:^{
             CGRect leftFrame    = _leftVC.view.frame;
             leftFrame.origin.x  = -_leftViewWidth;
             _leftVC.view.frame  = leftFrame;
@@ -148,22 +165,13 @@ typedef NS_ENUM(NSInteger, WZXDrawerShowState) {
             CGRect mainFrame    = _mainVC.view.frame;
             mainFrame.origin.x  = 0;
             _mainVC.view.frame  = mainFrame;
-        }];
-    }
-}
-
-- (void)_hideRightViewControlelr:(BOOL)animated {
-    if (_drawerType == WZXDrawerTypePlane) {
-        [UIView animateWithDuration:animated?_duration:0 animations:^{
+            
             CGRect rightFrame    = _rightVC.view.frame;
             rightFrame.origin.x  = self.view.frame.size.width;
             _rightVC.view.frame  = rightFrame;
-            
-            CGRect mainFrame     = _mainVC.view.frame;
-            mainFrame.origin.x   = 0;
-            _mainVC.view.frame   = mainFrame;
         }];
     }
+    _showState = WZXDrawerShowStateNone;
 }
 
 - (void)wzx_showLeft:(NSNotification *)noti {
@@ -176,12 +184,10 @@ typedef NS_ENUM(NSInteger, WZXDrawerShowState) {
     if (_showState == WZXDrawerShowStateLeft) {
         return;
     } else if (_showState == WZXDrawerShowStateRight) {
-        [self _hideRightViewControlelr:animated];
+        [self _hideViewController:animated];
     }
     
     [self _showLeftViewController:animated];
-    _showState = WZXDrawerShowStateLeft;
-    
 }
 
 - (void)wzx_showRight:(NSNotification *)noti {
@@ -193,25 +199,21 @@ typedef NS_ENUM(NSInteger, WZXDrawerShowState) {
     if (_showState == WZXDrawerShowStateRight) {
         return;
     } else if (_showState == WZXDrawerShowStateLeft) {
-        [self _hideLeftViewController:animated];
+        [self _hideViewController:animated];
     }
     
     [self _showRightViewController:animated];
-    _showState = WZXDrawerShowStateRight;
 }
 
 - (void)wzx_dismiss:(NSNotification *)noti {
     BOOL animated = noti.userInfo[@"animated"];
     
-    if (_showState == WZXDrawerShowStateLeft) {
-        [self _hideLeftViewController:animated];
-    } else if (_showState == WZXDrawerShowStateRight) {
-        [self _hideRightViewControlelr:animated];
-    } else {
+    if (_showState == WZXDrawerShowStateLeft ||
+        _showState == WZXDrawerShowStateRight) {
+        [self _hideViewController:animated];
+    }  else {
         return;
     }
-    
-    _showState = WZXDrawerShowStateNone;
 }
 
 #pragma mark set get
@@ -225,7 +227,96 @@ typedef NS_ENUM(NSInteger, WZXDrawerShowState) {
     _rightVC.view.frame = CGRectMake(self.view.frame.size.width, 0, _rightViewWidth, self.view.frame.size.height);
 }
 
+#pragma mark - addPan
+- (void)leftViewControllerAddPan {
+    [_leftVC.view addGestureRecognizer:[[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(leftPanAction:)]];
+}
 
+- (void)rightViewControllerAddPan {
+    [_rightVC.view addGestureRecognizer:[[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(rightPanAction:)]];
+}
+
+- (void)mainViewControllerAddPan {
+    [_mainVC.view addGestureRecognizer:[[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(mainPanAction:)]];
+}
+
+#pragma mark - PanAction
+- (void)leftPanAction:(UIPanGestureRecognizer *)sender {
+    CGPoint pt = [sender translationInView:sender.view];
+    CGRect leftViewFrame = _leftVC.view.frame;
+    leftViewFrame.origin.x += pt.x;
+    if (leftViewFrame.origin.x <= 0 &&
+        leftViewFrame.origin.x >= -_leftViewWidth) {
+        
+        _leftVC.view.frame = leftViewFrame;
+        [self changeOriginX:_mainVC.view addX:pt.x];
+        [self changeOriginX:_rightVC.view addX:pt.x];
+    }
+    
+    if (sender.state == UIGestureRecognizerStateEnded) {
+        if (leftViewFrame.origin.x > -_leftViewWidth/2.0) {
+            [self _showLeftViewController:YES];
+        } else {
+            [self _hideViewController:YES];
+        }
+    }
+    
+    [sender setTranslation:CGPointZero inView:sender.view];
+}
+
+- (void)rightPanAction:(UIPanGestureRecognizer *)sender {
+    CGPoint pt = [sender translationInView:sender.view];
+    CGRect rightViewFrame = _rightVC.view.frame;
+    rightViewFrame.origin.x += pt.x;
+    if (rightViewFrame.origin.x <= self.view.frame.size.width
+        && rightViewFrame.origin.x >= self.view.frame.size.width - _rightViewWidth) {
+        _rightVC.view.frame = rightViewFrame;
+        [self changeOriginX:_mainVC.view addX:pt.x];
+        [self changeOriginX:_leftVC.view addX:pt.x];
+    }
+    
+    if (sender.state == UIGestureRecognizerStateEnded) {
+        if (rightViewFrame.origin.x < (self.view.frame.size.width - _rightViewWidth/2.0)) {
+            [self _showRightViewController:YES];
+        } else {
+            [self _hideViewController:YES];
+        }
+    }
+    
+    [sender setTranslation:CGPointZero inView:sender.view];
+}
+
+- (void)mainPanAction:(UIPanGestureRecognizer *)sender {
+    CGPoint pt = [sender translationInView:sender.view];
+    CGRect mainViewFrame = _mainVC.view.frame;
+    mainViewFrame.origin.x += pt.x;
+    if (mainViewFrame.origin.x <= _leftViewWidth &&
+        mainViewFrame.origin.x >= -_rightViewWidth) {
+        
+        _mainVC.view.frame = mainViewFrame;
+        [self changeOriginX:_leftVC.view addX:pt.x];
+        [self changeOriginX:_rightVC.view addX:pt.x];
+    }
+    
+    if (sender.state == UIGestureRecognizerStateEnded) {
+        if (_mainVC.view.frame.origin.x > _leftViewWidth/2.0){
+            [self _showLeftViewController:YES];
+        } else if (_mainVC.view.frame.origin.x < -_rightViewWidth/2.0) {
+            [self _showRightViewController:YES];
+        } else {
+            [self _hideViewController:YES];
+        }
+    }
+    
+    [sender setTranslation:CGPointZero inView:sender.view];
+}
+
+
+- (void)changeOriginX:(UIView *)changeView addX:(CGFloat)addX {
+    CGRect rect      = changeView.frame;
+    rect.origin.x   += addX;
+    changeView.frame = rect;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];

@@ -16,7 +16,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = [UIColor greenColor];
+    self.title = @"WZXDrawer";
+    self.view.backgroundColor = [UIColor lightGrayColor];
     
     NSArray * titles = @[@"左",@"右"];
     NSArray * sels = @[@"showLeft:",@"showRight:"];

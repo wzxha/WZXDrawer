@@ -1,10 +1,16 @@
 # WZXDrawer
-侧滑框架
-当前版本0.1
+侧滑框架<br>
+当前版本**0.2**
 
-## Version 0.1 功能
-- 基本的侧滑功能
-- 自定义左右view长度
+## Version
+- Version 0.1
+   - 基本的侧滑功能.
+   - 自定义左右view长度.
+- Version 0.2
+   - 加入拖动手势.
+
+## 当前效果
+![image](https://github.com/Wzxhaha/WZXStorehouse/blob/master/WZXDrawer/WZXDrawer.gif)
 
 ## 怎么使用
 - 基本的侧滑功能,先创建一个VC继承于WZXDrawerViewController
@@ -38,7 +44,7 @@
   wzx_dismiss(BOOL animated);
   ```
   
-## 将要完成的功能
-- 拖动事件
+## TODO
+- ~~拖动事件~~ 
 - 阴影效果
-- 更加优雅的滑动方法
+- ~~更加优雅的滑动方法~~
